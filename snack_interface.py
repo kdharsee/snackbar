@@ -263,6 +263,51 @@ def update_balances( db, fname ):
             add_payment( db, i[0], i[1] )
 
 
+def search_name( db, name ):
+    query = '''
+    SELECT *
+    FROM {}
+    WHERE name LIKE '%{}%'
+    '''.format( tables['users'], name )
+    r = db.execute( query ).fetchall()
+    if ( len(r) == 1 ):
+        return r[0][1]
+    if ( len(r) > 1 ):
+        print "Unable to match user with name/id like: [{}]".format( name )
+        return False
+
+    query = '''
+    SELECT *
+    FROM {}
+    WHERE netid LIKE '%{}%'
+    '''.format( tables['users'], name )
+    r = db.execute( query ).fetchall()
+    if ( len(r) == 1 ):
+        return r[0][1]
+    else:
+        print "Unable to match user with name/id like: [{}]".format( name )
+        return False
+
+
+def names_to_ids( db, fname ):
+    with open( fname, 'r' ) as fp:
+        content = [x.split('\t') for x in fp.readlines()]
+        payments = [[y[0], int(y[1])] for y in content]
+
+        for i in payments:
+            netid = search_name( db, i[0] )
+            if netid: 
+                i[0] = netid
+            else:
+                continue
+
+        for i in payments:
+            with open( 'payments.tsv.new', 'a' ) as fp:
+                fp.write( '{}\t{}\n'.format( i[0], i[1] ) )
+
+
+
+
 def get_user( db, username ):
     query = '''
     SELECT *
