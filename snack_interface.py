@@ -333,7 +333,6 @@ def main( argv ):
                 raise Exception( 'Trying to create unknown table name {}'
                                  .format( table_name ) )
 
-    update_balances( db, 'py.tsv' )
     pdb.set_trace()
     # Set up window
     win = Tk()
