@@ -1,7 +1,7 @@
 #!/usr/bin/python
 import shutil
 from inspect import getargspec
-import pdb
+from pdb import set_trace as pdb
 import sys
 from Tkinter import *
 import sqlite3
@@ -262,6 +262,27 @@ def update_balances( db, fname ):
         for i in payments:
             add_payment( db, i[0], i[1] )
 
+def get_email_from_dbrow( row ):
+    return row[3]
+def get_balance_from_dbrow( row ):
+    return row[5]
+            
+def get_balances( db ):
+
+    query = '''
+    SELECT * FROM {}
+    '''.format( tables['users'] )
+    r = db.execute( query ).fetchall()
+
+    FORMAT = "%s\t%d\n"
+
+    for row in r:
+        email = get_email_from_dbrow( row )
+        balance = get_balance_from_dbrow( row )
+
+        with open( 'balances.list', 'a' ) as fp:
+            fp.write( FORMAT % (email, balance) )
+            
 
 def search_name( db, name ):
     query = '''
@@ -304,8 +325,6 @@ def names_to_ids( db, fname ):
         for i in payments:
             with open( 'payments.tsv.new', 'a' ) as fp:
                 fp.write( '{}\t{}\n'.format( i[0], i[1] ) )
-
-
 
 
 def get_user( db, username ):
@@ -377,8 +396,7 @@ def main( argv ):
                 # Should never get here
                 raise Exception( 'Trying to create unknown table name {}'
                                  .format( table_name ) )
-
-    pdb.set_trace()
+    pdb()
     # Set up window
     win = Tk()
     # Make window fullscreen
