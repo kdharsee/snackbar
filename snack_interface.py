@@ -7,6 +7,8 @@ from Tkinter import *
 import sqlite3
 from time import sleep
 
+DEBUG=1
+
 # List of SnackBar Tables
 tables = {
     'users' : 'users',
@@ -285,6 +287,8 @@ def get_balances( db ):
             
 
 def search_name( db, name ):
+    FAIL = False
+
     query = '''
     SELECT *
     FROM {}
@@ -294,8 +298,25 @@ def search_name( db, name ):
     if ( len(r) == 1 ):
         return r[0][1]
     if ( len(r) > 1 ):
-        print "Unable to match user with name/id like: [{}]".format( name )
+        print "Conflict trying to match name like: [{}]".format( name )
+        for match in r:
+            print "[CONFLICT] {}".format( match )
         return False
+
+
+    query = '''
+    SELECT *
+    FROM {}
+    WHERE email LIKE '%{}%'
+    '''.format( tables['users'], name )
+    r = db.execute( query ).fetchall()
+    if ( len(r) == 1 ):
+        return r[0][1]
+    if ( len(r) > 1 ):
+        print "Conflict trying to match email like: [{}]".format( name )
+        for match in r:
+            print "[CONFLICT] {}".format( match )
+            return False
 
     query = '''
     SELECT *
@@ -305,27 +326,45 @@ def search_name( db, name ):
     r = db.execute( query ).fetchall()
     if ( len(r) == 1 ):
         return r[0][1]
-    else:
-        print "Unable to match user with name/id like: [{}]".format( name )
-        return False
+    if ( len(r) > 1 ):
+        print "Conflict trying to match netid like: [{}]".format( name )
+        for match in r:
+            print "[CONFLICT] {}".format( match )
+            return False
+    
 
+    print "Unable to match user with name/id like: [{}]".format( name )
+    return False
+    
 
 def names_to_ids( db, fname ):
+    FAIL = False
+    
     with open( fname, 'r' ) as fp:
-        content = [x.split('\t') for x in fp.readlines()]
-        payments = [[y[0], int(y[1])] for y in content]
+        payments = []
+        for line in fp:
+            content = filter( bool, line.rstrip().split('\t') )
+            payments.append( [content[0], int(content[1])] )
+
+        pdb()
 
         for i in payments:
             netid = search_name( db, i[0] )
             if netid: 
                 i[0] = netid
             else:
+                FAIL = True
                 continue
 
-        for i in payments:
-            with open( 'payments.tsv.new', 'a' ) as fp:
-                fp.write( '{}\t{}\n'.format( i[0], i[1] ) )
-
+        if ( not FAIL ):
+            outfile = "%s.new" % fname
+            print "Matched all names to IDs! Output to {}".format( outfile )
+            for i in payments:
+                with open( outfile, 'a' ) as fp:
+                    fp.write( '{}\t{}\n'.format( i[0], i[1] ) )
+        else:
+            print "FAILED to match all names to IDs"
+            
 
 def get_user( db, username ):
     query = '''
@@ -396,6 +435,7 @@ def main( argv ):
                 # Should never get here
                 raise Exception( 'Trying to create unknown table name {}'
                                  .format( table_name ) )
+    names_to_ids( db, 'payments20180907.tsv' )
     pdb()
     # Set up window
     win = Tk()
