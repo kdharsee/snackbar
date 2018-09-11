@@ -254,8 +254,11 @@ def add_payment( db, username, payment ):
 
 def update_balances( db, fname ):
     with open( fname, 'r' ) as fp:
-        content = [x.split('\t') for x in fp.readlines()]
-        payments = [[y[0], int(y[1])] for y in content]
+        payments = []
+        for line in fp:
+            content = filter( bool, line.rstrip().split('\t') )
+            payments.append( [content[0], int(content[1])] )
+
         try:
             shutil.copy2( 'failed.tsv', 'failed.tsv.old' )
         except IOError as e:
@@ -346,8 +349,6 @@ def names_to_ids( db, fname ):
             content = filter( bool, line.rstrip().split('\t') )
             payments.append( [content[0], int(content[1])] )
 
-        pdb()
-
         for i in payments:
             netid = search_name( db, i[0] )
             if netid: 
@@ -435,7 +436,7 @@ def main( argv ):
                 # Should never get here
                 raise Exception( 'Trying to create unknown table name {}'
                                  .format( table_name ) )
-    names_to_ids( db, 'payments20180907.tsv' )
+
     pdb()
     # Set up window
     win = Tk()
