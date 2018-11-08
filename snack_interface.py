@@ -347,6 +347,10 @@ def names_to_ids( db, fname ):
         payments = []
         for line in fp:
             content = filter( bool, line.rstrip().split('\t') )
+            if ( not content ):
+                print "Bad line: [{}]".format( str(content) )
+                FAIL = True
+                break
             payments.append( [content[0], int(content[1])] )
 
         for i in payments:
@@ -410,6 +414,8 @@ def main( argv ):
     db = db_conn.cursor()
 
     if ( len( argv ) == 2 ):
+        names_to_ids( db, argv[1] )
+    elif ( len(argv) == 3 ):
         update_balances( db, argv[1] )
 
     # Check if all database tables are setup
