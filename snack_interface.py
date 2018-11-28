@@ -351,6 +351,7 @@ def names_to_ids( db, fname ):
                 print "Bad line: [{}]".format( str(content) )
                 FAIL = True
                 break
+            print "[DEBUG] content: {}".format( str( content ) )
             payments.append( [content[0], int(content[1])] )
 
         for i in payments:
