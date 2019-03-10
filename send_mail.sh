@@ -1,8 +1,8 @@
 #!/bin/sh
 # vim ft=sh
 
-real_balance=`echo "scale=2; ($2 + 100) / 100" | bc`
-round_balance=`echo "($2 + 100) / 100" | bc`
+real_balance=$(echo "scale=2; $2 / 100" | bc)
+round_balance=$(echo "$2 / 100" | bc)
 
 if [ $round_balance -eq 0 ]
 then
