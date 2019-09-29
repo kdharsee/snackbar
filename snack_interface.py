@@ -414,11 +414,6 @@ def main( argv ):
     db_conn = sqlite3.connect( db_file )
     db = db_conn.cursor()
 
-    if ( len( argv ) == 2 ):
-        names_to_ids( db, argv[1] )
-    elif ( len(argv) == 3 ):
-        update_balances( db, argv[1] )
-
     # Check if all database tables are setup
     for table_name in tables.values():
         query = '''
