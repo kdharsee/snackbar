@@ -70,7 +70,6 @@ def rm_user( db, username ):
         WHERE netid='{}';
         '''.format( tables['users'], netid )
         r = db.execute( query )
-        pdb()
         db.connection.commit()
 
     
