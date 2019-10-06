@@ -59,7 +59,21 @@ def add_inventory( db, product, cost ):
     r = db.execute( query )
     db.connection.commit()
 
+def rm_user( db, username ):
+    netid = search_name( db, username )
+    if ( not username ):
+        print('FAILED to remove user "{}". No match in database'.format(username))
 
+    else:
+        query = '''
+        DELETE FROM {} 
+        WHERE netid='{}';
+        '''.format( tables['users'], netid )
+        r = db.execute( query )
+        pdb()
+        db.connection.commit()
+
+    
 def add_user( db, username, password, name, email ):
     query = '''
     INSERT INTO {} (
@@ -251,6 +265,7 @@ def main( argv ):
     parser = argparse.ArgumentParser()
     parser.add_argument('--dump', '-d', action='store_true', help='print(all user information')
     parser.add_argument('--adduser', '-u', nargs=4, help='Add a user', metavar=('<username>', '<password>', '<name>', '<email>'))
+    parser.add_argument('--rmuser', '-r', nargs=1, help='Delete a user', metavar=('<username>'))
     parser.add_argument('--addinventory', '-i', nargs=2, help='Add an inventory item', metavar=('<product>', '<cost (in cents)>'))
     parser.add_argument('--addpayment', '-p', nargs=2, help='Add a payment', metavar=('<username>', '<amount (in cents)>'))
     parser.add_argument('--batchpayments', '-b', nargs=1, help='Update balances from payments file', metavar='<batchfile>')
@@ -279,16 +294,19 @@ def main( argv ):
         print('All Users:')
         dump_users(db)
     elif args.adduser:
-        print('Adding User...:')
+        print('Adding User...')
         add_user(db, args.adduser[0], args.adduser[1], args.adduser[2], args.adduser[3])
+    elif args.rmuser:
+        print('Deleting User...')
+        rm_user(db, args.rmuser[0])
     elif args.addinventory:
-        print('Adding to Inventory...:')
+        print('Adding to Inventory...')
         add_inventory(db, args.addinventory[0], args.addinventory[1])
     elif args.addpayment:
-        print('Adding Payment...:')
+        print('Adding Payment...')
         add_payment(db, args.addpayment[0], args.addpayment[1])
     elif args.batchpayments:
-        print('Adding Batch Payments...:')
+        print('Adding Batch Payments...')
         payments_file = names_to_ids(db, args.batchpayments[0])
         if not payments_file:
             print("Aborting...")
