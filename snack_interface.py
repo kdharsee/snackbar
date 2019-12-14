@@ -141,7 +141,7 @@ class SnackBar_Interface:
 
             # Add product and order mapping to dictionary
             self.product_dict[row[0]] = (row[1], product_qty)
-            
+
         # Separator between products and submit button
         separator = Frame( height=2, bd=1, relief=SUNKEN )
         separator.grid( row=count, columnspan=3 )
@@ -173,15 +173,22 @@ class SnackBar_Interface:
         # Calculate cost of order 
         total = 0
         for k in self.product_dict:
+
+            cost = self.product_dict[k][0]
+            qty = int(self.product_dict[k][1].get())
+
+            # Skip if this entry has a quantity <1
+            if ( qty < 1 ):
+                continue
             # Add (quantity * cost) to total
-            total += self.product_dict[k][0] * int(self.product_dict[k][1].get())
+            total += qty * cost
             # Submit Each order to transactions table
             query = '''
             INSERT INTO {} (netid, inventoryid, quantity)
             VALUES
             ( '{}', (SELECT inventoryid FROM {} WHERE product='{}'), {} );
             '''.format( tables['transactions'], self.username,
-                        tables['inventory'], k, self.product_dict[k][0] )
+                        tables['inventory'], k, qty )
             self.db.execute( query )
             self.db.connection.commit()
 
@@ -439,7 +446,6 @@ def main( argv ):
                 raise Exception( 'Trying to create unknown table name {}'
                                  .format( table_name ) )
 
-    pdb()
     # Set up window
     win = Tk()
     # Make window fullscreen
