@@ -32,7 +32,8 @@ CREATE TABLE {} (
 transid integer PRIMARY KEY AUTOINCREMENT,
 netid text NOT NULL, 
 inventoryid integer NOT NULL,
-quantity text NOT NULL,
+quantity integer NOT NULL,
+cost integer NON NULL,
 timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
 );'''.format( tables['transactions'] )
 
@@ -184,11 +185,11 @@ class SnackBar_Interface:
             total += qty * cost
             # Submit Each order to transactions table
             query = '''
-            INSERT INTO {} (netid, inventoryid, quantity)
+            INSERT INTO {} (netid, inventoryid, quantity, cost)
             VALUES
-            ( '{}', (SELECT inventoryid FROM {} WHERE product='{}'), {} );
+            ( '{}', (SELECT inventoryid FROM {} WHERE product='{}'), {}, {} );
             '''.format( tables['transactions'], self.username,
-                        tables['inventory'], k, qty )
+                        tables['inventory'], k, qty, cost )
             self.db.execute( query )
             self.db.connection.commit()
 
