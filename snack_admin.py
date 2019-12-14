@@ -259,6 +259,15 @@ def dump_users( db ):
 
     print('\n'.join( [str(x) for x in r] ))
 
+def dump_transactions( db ):
+    query = '''
+    SELECT * FROM {}
+    ORDER BY timestamp ASC LIMIT 100
+    '''.format( tables['transactions'] )
+    r = db.execute( query ).fetchall()
+
+    print('\n'.join( [str(x) for x in r] ))
+    
 def main( argv ):
 
     parser = argparse.ArgumentParser()
@@ -268,6 +277,7 @@ def main( argv ):
     parser.add_argument('--addinventory', '-i', nargs=2, help='Add an inventory item', metavar=('<product>', '<cost (in cents)>'))
     parser.add_argument('--addpayment', '-p', nargs=2, help='Add a payment', metavar=('<username>', '<amount (in cents)>'))
     parser.add_argument('--batchpayments', '-b', nargs=1, help='Update balances from payments file', metavar='<batchfile>')
+    parser.add_argument('--transactions', '-t', action='store_true', help='Update balances from payments file')
     args = parser.parse_args()
     
     db_file = './snackbar.db'
@@ -318,6 +328,9 @@ def main( argv ):
         balance_file = 'balances{}.tsv'.format(datetime.date.today().strftime("%Y%m%d"))
         get_balances(db, fname=balance_file)
         print('Balances post-payment written to: {}'.format(balance_file))
+    elif args.transactions:
+        print('Last 100 Transactions:')
+        dump_transactions(db)
     else:
         parser.print_help()
         
