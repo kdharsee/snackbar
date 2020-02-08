@@ -49,7 +49,22 @@ GET_INVENTORY_LIST_QUERY = '''
 SELECT product,cost FROM {}
 '''.format( tables['inventory'] )
 
+def dump_inventory( db ):
+    query = '''
+    SELECT * FROM {}
+    '''.format( tables['inventory'] )
+    r = db.execute( query ).fetchall()
 
+    print('\n'.join( [str(x) for x in r] ))
+
+def rm_inventory( db, inv_id ):
+    query = '''
+        DELETE FROM {} 
+        WHERE inventoryid={};
+        '''.format( tables['inventory'], inv_id )
+    r = db.execute( query )
+    db.connection.commit()
+    
 def add_inventory( db, product, cost ):
     query = '''
     INSERT INTO {} (
@@ -71,7 +86,6 @@ def rm_user( db, username ):
         '''.format( tables['users'], netid )
         r = db.execute( query )
         db.connection.commit()
-
     
 def add_user( db, username, password, name, email ):
     query = '''
@@ -271,9 +285,11 @@ def dump_transactions( db ):
 def main( argv ):
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('--dump', '-d', action='store_true', help='print(all user information')
+    parser.add_argument('--dump', '-d', action='store_true', help='print all user information')
+    parser.add_argument('--dumpinventory', '-D', action='store_true', help='print all inventory information')
     parser.add_argument('--adduser', '-u', nargs=4, help='Add a user', metavar=('<username>', '<password>', '<name>', '<email>'))
     parser.add_argument('--rmuser', '-r', nargs=1, help='Delete a user', metavar=('<username>'))
+    parser.add_argument('--rminventory', '-R', nargs=1, help='Delete an inventory item', metavar=('<inventory_id>'))
     parser.add_argument('--addinventory', '-i', nargs=2, help='Add an inventory item', metavar=('<product>', '<cost (in cents)>'))
     parser.add_argument('--addpayment', '-p', nargs=2, help='Add a payment', metavar=('<username>', '<amount (in cents)>'))
     parser.add_argument('--batchpayments', '-b', nargs=1, help='Update balances from payments file', metavar='<batchfile>')
@@ -308,6 +324,12 @@ def main( argv ):
     elif args.rmuser:
         print('Deleting User...')
         rm_user(db, args.rmuser[0])
+    elif args.dumpinventory:
+        print('All Inventory Items:')
+        dump_inventory(db)
+    elif args.rminventory:
+        print('Deleting Inventory Item...')
+        rm_inventory(db, args.rminventory[0])
     elif args.addinventory:
         print('Adding to Inventory...')
         add_inventory(db, args.addinventory[0], args.addinventory[1])
