@@ -293,7 +293,7 @@ def main( argv ):
     parser.add_argument('--addinventory', '-i', nargs=2, help='Add an inventory item', metavar=('<product>', '<cost (in cents)>'))
     parser.add_argument('--addpayment', '-p', nargs=2, help='Add a payment', metavar=('<username>', '<amount (in cents)>'))
     parser.add_argument('--batchpayments', '-b', nargs=1, help='Update balances from payments file', metavar='<batchfile>')
-    parser.add_argument('--transactions', '-t', action='store_true', help='Update balances from payments file')
+    parser.add_argument('--transactions', '-t', action='store_true', help='Print the last 100 transactions')
     args = parser.parse_args()
     
     db_file = './snackbar.db'
